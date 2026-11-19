@@ -16,10 +16,18 @@
       box-sizing: border-box;
     }
 
+    html,
     body {
       background-color: #0d1512;
       color: #f1f5f3;
       overflow-x: hidden;
+      max-width: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
@@ -32,6 +40,7 @@
     .no-scrollbar {
       -ms-overflow-style: none;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Kort-animationer */
@@ -117,12 +126,12 @@
   <!-- ========================================================= -->
   <!-- 1. STARTSKÆRM / OPSÆTNING                                  -->
   <!-- ========================================================= -->
-  <main id="setup-screen" class="flex-1 flex flex-col justify-between max-w-lg w-full mx-auto p-5 sm:p-6">
-    <div class="pt-4 sm:pt-8">
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-700/40 text-emerald-300 text-xs font-semibold tracking-wide uppercase mb-4">
+  <main id="setup-screen" class="flex-1 flex flex-col justify-between w-full max-w-[480px] mx-auto px-3.5 py-3 sm:p-6">
+    <div class="pt-2 sm:pt-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-700/40 text-emerald-300 text-xs font-semibold tracking-wide uppercase mb-3">
         <span>🛣️</span> Roadtrip Edition
       </div>
-      <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+      <h1 class="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
         Hvem kender hvem bedst?
       </h1>
       <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
@@ -130,34 +139,34 @@
       </p>
 
       <!-- Spiller-opsætning kort -->
-      <div class="mt-6 bg-[#14201c] border border-emerald-900/50 rounded-3xl p-5 shadow-xl space-y-5">
+      <div class="mt-5 bg-[#14201c] border border-emerald-900/50 rounded-3xl p-4 sm:p-5 shadow-xl space-y-4">
         <!-- Spiller 1 -->
         <div>
-          <label for="input-p1" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-            Spiller 1
-          </label>
-          <div class="flex items-center gap-2.5">
-            <input
-              id="input-p1"
-              type="text"
-              value="Rasmus"
-              maxlength="18"
-              placeholder="Navn på Spiller 1"
-              class="flex-1 bg-[#0d1512] border border-emerald-800/60 focus:border-emerald-400 focus:outline-none rounded-2xl px-4 py-3 text-white font-semibold text-base"
-            />
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <label for="input-p1" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Spiller 1
+            </label>
             <button
               type="button"
               id="role-badge-p1"
               onclick="toggleRolesSetup()"
-              class="px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border transition-colors shrink-0"
+              class="px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border transition-colors shrink-0 whitespace-nowrap"
             >
               <!-- Udfyldes af JS -->
             </button>
           </div>
+          <input
+            id="input-p1"
+            type="text"
+            value="Rasmus"
+            maxlength="18"
+            placeholder="Navn på Spiller 1"
+            class="w-full min-w-0 bg-[#0d1512] border border-emerald-800/60 focus:border-emerald-400 focus:outline-none rounded-2xl px-4 py-3 text-white font-semibold text-base"
+          />
         </div>
 
         <!-- Byt roller knap -->
-        <div class="flex items-center justify-center -my-1">
+        <div class="flex items-center justify-center">
           <button
             type="button"
             onclick="toggleRolesSetup()"
@@ -169,47 +178,47 @@
 
         <!-- Spiller 2 -->
         <div>
-          <label for="input-p2" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-            Spiller 2
-          </label>
-          <div class="flex items-center gap-2.5">
-            <input
-              id="input-p2"
-              type="text"
-              value="Marie"
-              maxlength="18"
-              placeholder="Navn på Spiller 2"
-              class="flex-1 bg-[#0d1512] border border-emerald-800/60 focus:border-emerald-400 focus:outline-none rounded-2xl px-4 py-3 text-white font-semibold text-base"
-            />
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <label for="input-p2" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Spiller 2
+            </label>
             <button
               type="button"
               id="role-badge-p2"
               onclick="toggleRolesSetup()"
-              class="px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border transition-colors shrink-0"
+              class="px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border transition-colors shrink-0 whitespace-nowrap"
             >
               <!-- Udfyldes af JS -->
             </button>
           </div>
+          <input
+            id="input-p2"
+            type="text"
+            value="Marie"
+            maxlength="18"
+            placeholder="Navn på Spiller 2"
+            class="w-full min-w-0 bg-[#0d1512] border border-emerald-800/60 focus:border-emerald-400 focus:outline-none rounded-2xl px-4 py-3 text-white font-semibold text-base"
+          />
         </div>
       </div>
     </div>
 
     <!-- Start-knapper -->
-    <div class="mt-8 pb-4 space-y-3">
+    <div class="mt-6 pb-3 space-y-2.5">
       <!-- Fortsæt gemt spil (vises kun hvis der findes et igangværende spil) -->
       <button
         id="btn-resume-game"
         type="button"
         onclick="resumeSavedGame()"
-        class="hidden w-full btn-press bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-base py-4 px-6 rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+        class="hidden w-full btn-press bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm sm:text-base py-3.5 px-4 rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
       >
-        <span>▶️</span> Fortsæt igangværende tur (<span id="resume-score-preview">0 - 0</span>)
+        <span>▶️</span> <span class="truncate">Fortsæt tur (<span id="resume-score-preview">0 - 0</span>)</span>
       </button>
 
       <button
         type="button"
         onclick="startNewGame()"
-        class="w-full btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-base py-4 px-6 rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+        class="w-full btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-base py-4 px-5 rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
       >
         <span>🚀</span> Start nyt roadtrip-spil
       </button>
@@ -219,30 +228,30 @@
   <!-- ========================================================= -->
   <!-- 2. SPILSKÆRM (GAME MASTER VIEW)                           -->
   <!-- ========================================================= -->
-  <div id="game-screen" class="hidden flex-1 flex flex-col max-w-lg w-full mx-auto min-h-[100dvh]">
+  <div id="game-screen" class="hidden flex-1 flex flex-col justify-between w-full max-w-[480px] mx-auto min-h-[100dvh] overflow-x-hidden">
 
     <!-- TOPBAR: Live Pointtavle & Hurtighandlinger -->
-    <header class="sticky top-0 z-30 bg-[#0d1512]/95 backdrop-blur-md border-b border-emerald-900/50 px-4 pt-3 pb-3">
+    <header class="sticky top-0 z-30 bg-[#0d1512]/95 backdrop-blur-md border-b border-emerald-900/50 px-3.5 pt-2.5 pb-2.5 w-full">
       <!-- Top utility-række -->
-      <div class="flex items-center justify-between gap-2 mb-2.5">
+      <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2">
         <button
           type="button"
           onclick="returnToMenu()"
-          class="btn-press px-2.5 py-1.5 rounded-xl bg-[#16231f] border border-emerald-900/60 text-slate-300 text-xs font-semibold flex items-center gap-1"
+          class="btn-press px-2.5 py-1.5 rounded-xl bg-[#16231f] border border-emerald-900/60 text-slate-300 text-xs font-semibold flex items-center gap-1 shrink-0"
           title="Tilbage til startskærm"
         >
           <span>⚙️</span> Menu
         </button>
 
-        <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400/90 flex items-center gap-1.5">
-          <span>🎯</span> Mål: <span id="target-score-label">10</span> point
+        <div class="text-[11px] font-bold uppercase tracking-wide text-emerald-400/90 flex items-center gap-1 shrink-0">
+          <span>🎯</span> Mål: <span id="target-score-label">10</span> pt
         </div>
 
-        <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onclick="swapRolesInGame()"
-            class="btn-press px-2.5 py-1.5 rounded-xl bg-[#16231f] border border-emerald-900/60 text-amber-300 text-xs font-semibold flex items-center gap-1"
+            class="btn-press px-2.5 py-1.5 rounded-xl bg-[#16231f] border border-emerald-900/60 text-amber-300 text-xs font-semibold flex items-center gap-1 whitespace-nowrap"
             title="Byt chauffør og passager"
           >
             <span>🔄</span> Byt
@@ -250,7 +259,7 @@
           <button
             type="button"
             onclick="openAddQuestionModal()"
-            class="btn-press px-2.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1"
+            class="btn-press px-2.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1 whitespace-nowrap"
           >
             <span>+</span> Spørgsmål
           </button>
@@ -258,18 +267,18 @@
       </div>
 
       <!-- Pointtavle -->
-      <div class="grid grid-cols-2 gap-2.5">
+      <div class="grid grid-cols-2 gap-2 w-full">
         <!-- Spiller 1 Score Card -->
-        <div id="score-card-p1" class="bg-[#14201c] border border-emerald-800/50 rounded-2xl p-2.5 relative overflow-hidden">
-          <div class="flex items-center justify-between gap-1">
-            <div class="min-w-0">
-              <div class="flex items-center gap-1.5">
-                <span id="game-role-icon-p1" class="text-sm">🚗</span>
+        <div id="score-card-p1" class="min-w-0 bg-[#14201c] border border-emerald-800/50 rounded-2xl p-2.5 relative overflow-hidden">
+          <div class="flex items-center justify-between gap-1.5">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1 min-w-0">
+                <span id="game-role-icon-p1" class="text-sm shrink-0">🚗</span>
                 <span id="game-name-p1" class="font-bold text-sm text-white truncate">Rasmus</span>
               </div>
-              <span id="game-role-text-p1" class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Chauffør</span>
+              <span id="game-role-text-p1" class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block truncate">Chauffør</span>
             </div>
-            <div id="game-score-p1" class="text-2xl font-black text-emerald-400 tabular-nums pl-2">0</div>
+            <div id="game-score-p1" class="text-2xl font-black text-emerald-400 tabular-nums shrink-0 pl-1">0</div>
           </div>
           <!-- Progress bar mod delmål -->
           <div class="w-full h-1.5 bg-[#0a100e] rounded-full mt-2 overflow-hidden">
@@ -278,16 +287,16 @@
         </div>
 
         <!-- Spiller 2 Score Card -->
-        <div id="score-card-p2" class="bg-[#14201c] border border-emerald-800/50 rounded-2xl p-2.5 relative overflow-hidden">
-          <div class="flex items-center justify-between gap-1">
-            <div class="min-w-0">
-              <div class="flex items-center gap-1.5">
-                <span id="game-role-icon-p2" class="text-sm">🎮</span>
+        <div id="score-card-p2" class="min-w-0 bg-[#14201c] border border-emerald-800/50 rounded-2xl p-2.5 relative overflow-hidden">
+          <div class="flex items-center justify-between gap-1.5">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1 min-w-0">
+                <span id="game-role-icon-p2" class="text-sm shrink-0">🎮</span>
                 <span id="game-name-p2" class="font-bold text-sm text-white truncate">Marie</span>
               </div>
-              <span id="game-role-text-p2" class="text-[10px] uppercase tracking-wider text-amber-400 font-semibold block">Game Master</span>
+              <span id="game-role-text-p2" class="text-[10px] uppercase tracking-wider text-amber-400 font-semibold block truncate">Game Master</span>
             </div>
-            <div id="game-score-p2" class="text-2xl font-black text-amber-400 tabular-nums pl-2">0</div>
+            <div id="game-score-p2" class="text-2xl font-black text-amber-400 tabular-nums shrink-0 pl-1">0</div>
           </div>
           <!-- Progress bar mod delmål -->
           <div class="w-full h-1.5 bg-[#0a100e] rounded-full mt-2 overflow-hidden">
@@ -298,42 +307,42 @@
     </header>
 
     <!-- KATEGORI-VÆLGER (Pill-bar) -->
-    <nav aria-label="Kategorier" class="px-4 pt-3 pb-1">
-      <div id="category-pills" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+    <nav aria-label="Kategorier" class="w-full px-3.5 pt-2.5 pb-1">
+      <div id="category-pills" class="flex items-center gap-2 w-full overflow-x-auto no-scrollbar pb-1">
         <!-- Genereres dynamisk via JS -->
       </div>
     </nav>
 
     <!-- MIDTERSEKTION: Swipe-venligt Spørgsmålskort -->
-    <section class="flex-1 flex flex-col justify-center px-4 py-2">
+    <section class="flex-1 flex flex-col justify-center w-full px-3.5 py-2">
       <div
         id="question-card"
         onclick="nextCard()"
-        class="card-enter cursor-pointer relative bg-gradient-to-br from-[#172621] to-[#111c18] border border-emerald-700/40 rounded-3xl p-6 sm:p-7 shadow-2xl min-h-[230px] sm:min-h-[260px] flex flex-col justify-between transition-transform duration-150 active:scale-[0.99]"
+        class="card-enter cursor-pointer relative w-full bg-gradient-to-br from-[#172621] to-[#111c18] border border-emerald-700/40 rounded-3xl p-5 sm:p-7 shadow-2xl min-h-[210px] sm:min-h-[250px] flex flex-col justify-between transition-transform duration-150 active:scale-[0.99]"
       >
         <!-- Kort-top: Kategori badge & tæller -->
-        <div class="flex items-center justify-between gap-2">
-          <span id="card-category-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+        <div class="flex items-center justify-between gap-2 min-w-0">
+          <span id="card-category-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 truncate max-w-[72%]">
             ✨ Kategori
           </span>
-          <span id="card-counter" class="text-xs font-semibold text-slate-400 tabular-nums">
+          <span id="card-counter" class="text-xs font-semibold text-slate-400 tabular-nums shrink-0 whitespace-nowrap">
             Kort 1 / 36
           </span>
         </div>
 
         <!-- Kort-midte: Selve spørgsmålet -->
-        <div class="my-auto py-5">
-          <p id="card-question-text" class="text-xl sm:text-2xl font-extrabold text-white leading-snug tracking-tight">
+        <div class="my-auto py-4">
+          <p id="card-question-text" class="text-lg sm:text-2xl font-extrabold text-white leading-snug tracking-tight break-words">
             Indlæser spørgsmål...
           </p>
         </div>
 
         <!-- Kort-bund: Hint & Bullshit-tæller -->
-        <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-emerald-900/40">
-          <span class="flex items-center gap-1">
+        <div class="flex items-center justify-between gap-2 text-xs text-slate-400 pt-2 border-t border-emerald-900/40">
+          <span class="flex items-center gap-1 truncate">
             👆 Tryk eller swipe for næste
           </span>
-          <span id="bullshit-counter-badge" class="text-rose-400/90 font-semibold">
+          <span id="bullshit-counter-badge" class="text-rose-400/90 font-semibold shrink-0 whitespace-nowrap">
             🚨 0 BS
           </span>
         </div>
@@ -341,53 +350,53 @@
     </section>
 
     <!-- BUNDSEKTION: Game Master-styring -->
-    <footer class="px-4 pb-5 pt-2 space-y-2.5">
+    <footer class="w-full px-3.5 pb-4 pt-1.5 space-y-2">
       <!-- Bullshit-knap -->
       <button
         type="button"
         onclick="triggerBullshit()"
-        class="w-full btn-press bg-gradient-to-r from-rose-600 via-red-600 to-rose-600 hover:from-rose-500 hover:to-rose-500 text-white font-black text-base py-3.5 px-4 rounded-2xl shadow-lg shadow-red-900/40 border border-red-400/40 flex items-center justify-center gap-2 tracking-wide"
+        class="w-full btn-press bg-gradient-to-r from-rose-600 via-red-600 to-rose-600 hover:from-rose-500 hover:to-rose-500 text-white font-black text-base py-3 px-4 rounded-2xl shadow-lg shadow-red-900/40 border border-red-400/40 flex items-center justify-center gap-2 tracking-wide"
       >
         <span>🚨</span> BULLSHIT! <span>🚨</span>
       </button>
 
       <!-- Point-knapper (Spiller 1 & Spiller 2) -->
-      <div class="grid grid-cols-2 gap-2.5">
+      <div class="grid grid-cols-2 gap-2 w-full">
         <button
           type="button"
           onclick="awardPoints(1)"
-          class="btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm sm:text-base py-3.5 px-3 rounded-2xl shadow-md shadow-emerald-950/50 flex flex-col items-center justify-center leading-tight"
+          class="min-w-0 btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm sm:text-base py-3 px-2.5 rounded-2xl shadow-md shadow-emerald-950/50 flex flex-col items-center justify-center leading-tight"
         >
-          <span class="text-[11px] font-bold uppercase opacity-80">+1 Point til</span>
+          <span class="text-[10px] sm:text-[11px] font-bold uppercase opacity-80">+1 Point til</span>
           <span id="btn-name-p1" class="truncate max-w-full">Rasmus</span>
         </button>
 
         <button
           type="button"
           onclick="awardPoints(2)"
-          class="btn-press bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm sm:text-base py-3.5 px-3 rounded-2xl shadow-md shadow-amber-950/50 flex flex-col items-center justify-center leading-tight"
+          class="min-w-0 btn-press bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm sm:text-base py-3 px-2.5 rounded-2xl shadow-md shadow-amber-950/50 flex flex-col items-center justify-center leading-tight"
         >
-          <span class="text-[11px] font-bold uppercase opacity-80">+1 Point til</span>
+          <span class="text-[10px] sm:text-[11px] font-bold uppercase opacity-80">+1 Point til</span>
           <span id="btn-name-p2" class="truncate max-w-full">Marie</span>
         </button>
       </div>
 
       <!-- Begge får point & Spring over -->
-      <div class="grid grid-cols-3 gap-2.5">
+      <div class="grid grid-cols-3 gap-2 w-full">
         <button
           type="button"
           onclick="awardPoints('both')"
-          class="col-span-2 btn-press bg-[#1c2e28] hover:bg-[#243b33] border border-emerald-600/40 text-emerald-200 font-bold text-sm py-3 px-3 rounded-2xl flex items-center justify-center gap-1.5"
+          class="col-span-2 min-w-0 btn-press bg-[#1c2e28] hover:bg-[#243b33] border border-emerald-600/40 text-emerald-200 font-bold text-xs sm:text-sm py-3 px-2.5 rounded-2xl flex items-center justify-center gap-1.5"
         >
-          <span>🤝</span> Begge får point (Enige!)
+          <span class="shrink-0">🤝</span> <span class="truncate">Begge får point (Enige!)</span>
         </button>
 
         <button
           type="button"
           onclick="nextCard(true)"
-          class="col-span-1 btn-press bg-[#15201c] hover:bg-[#1c2b26] border border-slate-700/60 text-slate-300 font-semibold text-sm py-3 px-2 rounded-2xl flex items-center justify-center gap-1"
+          class="col-span-1 min-w-0 btn-press bg-[#15201c] hover:bg-[#1c2b26] border border-slate-700/60 text-slate-300 font-semibold text-xs sm:text-sm py-3 px-2 rounded-2xl flex items-center justify-center gap-1 whitespace-nowrap"
         >
-          Spring over <span>⏭️</span>
+          <span>Spring</span> <span>⏭️</span>
         </button>
       </div>
     </footer>
@@ -687,16 +696,16 @@
       const badge2 = document.getElementById('role-badge-p2');
 
       if (state.driver === 1) {
-        badge1.className = 'px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shrink-0';
+        badge1.className = 'px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shrink-0 whitespace-nowrap';
         badge1.innerHTML = '<span>🚗</span> Chauffør';
 
-        badge2.className = 'px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border bg-amber-500/15 border-amber-500/40 text-amber-300 shrink-0';
+        badge2.className = 'px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border bg-amber-500/15 border-amber-500/40 text-amber-300 shrink-0 whitespace-nowrap';
         badge2.innerHTML = '<span>🎮</span> Passager';
       } else {
-        badge1.className = 'px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border bg-amber-500/15 border-amber-500/40 text-amber-300 shrink-0';
+        badge1.className = 'px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border bg-amber-500/15 border-amber-500/40 text-amber-300 shrink-0 whitespace-nowrap';
         badge1.innerHTML = '<span>🎮</span> Passager';
 
-        badge2.className = 'px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shrink-0';
+        badge2.className = 'px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shrink-0 whitespace-nowrap';
         badge2.innerHTML = '<span>🚗</span> Chauffør';
       }
 

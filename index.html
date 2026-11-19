@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="da" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Hvem kender hvem bedst? – Roadtrip Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* Grundlæggende typografi og mobil-optimering */
+    * {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0d1512;
+      color: #f1f5f3;
+      overflow-x: hidden;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Skjul scrollbar på kategori-baren */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Kort-animationer */
+    @keyframes cardEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.96);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card-enter {
+      animation: cardEnter 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Bullshit-skærmryst */
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      15% { transform: translate(-8px, 4px) rotate(-1deg); }
+      30% { transform: translate(8px, -4px) rotate(1deg); }
+      45% { transform: translate(-6px, -3px) rotate(-0.5deg); }
+      60% { transform: translate(6px, 3px) rotate(0.5deg); }
+      75% { transform: translate(-4px, 2px) rotate(0deg); }
+    }
+
+    .shake-active {
+      animation: screenShake 0.42s ease-in-out;
+    }
+
+    /* Rød flash ved Bullshit */
+    @keyframes redFlash {
+      0% { opacity: 0.45; }
+      100% { opacity: 0; }
+    }
+
+    .flash-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle, rgba(239,68,68,0.55) 0%, rgba(153,27,27,0.85) 100%);
+      z-index: 60;
+      opacity: 0;
+    }
+
+    .flash-active {
+      animation: redFlash 0.55s ease-out forwards;
+    }
+
+    /* Taktil knap-feedback */
+    .btn-press {
+      transition: transform 0.1s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-press:active {
+      transform: scale(0.96);
+    }
+
+    /* Konfetti canvas */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 70;
+    }
+  </style>
+</head>
+<body class="bg-[#0d1512] text-[#f1f5f3] select-none">
+
+  <!-- Rød Bullshit flash overlay -->
+  <div id="bullshit-flash" class="flash-overlay"></div>
+
+  <!-- Konfetti canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Toast besked (erstatter alert) -->
+  <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-[-10px]">
+    <div id="toast-message" class="bg-[#1e2e28] border border-emerald-500/40 text-emerald-100 px-4 py-2.5 rounded-2xl shadow-2xl text-sm font-medium flex items-center gap-2 whitespace-nowrap">
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 1. STARTSKÆRM / OPSÆTNING                                  -->
+  <!-- ========================================================= -->
+  <main id="setup-screen" class="flex-1 flex flex-col justify-between max-w-lg w-full mx-auto p-5 sm:p-6">
+    <div class="pt-4 sm:pt-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-700/40 text-emerald-300 text-xs font-semibold tracking-wide uppercase mb-4">
+        <span>🛣️</span> Roadtrip Edition
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+        Hvem kender hvem bedst?
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
+        Passageren er <span class="text-amber-400 font-semibold">Game Master 🎮</span> og styrer kort, point og løgnedetektor. Chaufføren <span class="text-emerald-400 font-semibold">🚗</span> holder øjnene på vejen og svarer højt!
+      </p>
+
+      <!-- Spiller-opsætning kort -->
+      <div class="mt-6 bg-[#14201c] border border-emerald-900/50 rounded-3xl p-5 shadow-xl space-y-5">
+        <!-- Spiller 1 -->
+        <div>
+          <label for="input-p1" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+            Spiller 1
+          </label>
+          <div class="flex items-center gap-2.5">
+            <input
+              id="input-p1"
+              type="text"
+              value="Rasmus"
+              maxlength="18"
+              placeholder="Navn på Spiller 1"
+              class="flex-1 bg-[#0d1512] border border-emerald-800/60 focus:border-emerald-400 focus:outline-none rounded-2xl px-4 py-3 text-white font-semibold text-base"
+            />
+            <button
+              type="button"
+              id="role-badge-p1"
+              onclick="toggleRolesSetup()"
+              class="px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border transition-colors shrink-0"
+            >
+              <!-- Udfyldes af JS -->
+            </button>
+          </div>
+        </div>
+
+        <!-- Byt roller knap -->
+        <div class="flex items-center justify-center -my-1">
+          <button
+            type="button"
+            onclick="toggleRolesSetup()"
+            class="btn-press inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1c2d27] hover:bg-[#243931] border border-emerald-700/40 text-emerald-300 text-xs font-semibold"
+          >
+            <span>🔄</span> Byt hvem der kører
+          </button>
+        </div>
+
+        <!-- Spiller 2 -->
+        <div>
+          <label for="input-p2" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+            Spiller 2
+          </label>
+          <div class="flex items-center gap-2.5">
+            <input
+              id="input-p2"
+              type="text"
+              value="Marie"
+              maxlength="18"
+              placeholder="Navn på Spiller 2"
+              class="flex-1 bg-[#0d1512] border border-emerald-800/60 focus:border-emerald-400 focus:outline-none rounded-2xl px-4 py-3 text-white font-semibold text-base"
+            />
+            <button
+              type="button"
+              id="role-badge-p2"
+              onclick="toggleRolesSetup()"
+              class="px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border transition-colors shrink-0"
+            >
+              <!-- Udfyldes af JS -->
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start-knapper -->
+    <div class="mt-8 pb-4 space-y-3">
+      <!-- Fortsæt gemt spil (vises kun hvis der findes et igangværende spil) -->
+      <button
+        id="btn-resume-game"
+        type="button"
+        onclick="resumeSavedGame()"
+        class="hidden w-full btn-press bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-base py-4 px-6 rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+      >
+        <span>▶️</span> Fortsæt igangværende tur (<span id="resume-score-preview">0 - 0</span>)
+      </button>
+
+      <button
+        type="button"
+        onclick="startNewGame()"
+        class="w-full btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-base py-4 px-6 rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+      >
+        <span>🚀</span> Start nyt roadtrip-spil
+      </button>
+    </div>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- 2. SPILSKÆRM (GAME MASTER VIEW)                           -->
+  <!-- ========================================================= -->
+  <div id="game-screen" class="hidden flex-1 flex flex-col max-w-lg w-full mx-auto min-h-[100dvh]">
+
+    <!-- TOPBAR: Live Pointtavle & Hurtighandlinger -->
+    <header class="sticky top-0 z-30 bg-[#0d1512]/95 backdrop-blur-md border-b border-emerald-900/50 px-4 pt-3 pb-3">
+      <!-- Top utility-række -->
+      <div class="flex items-center justify-between gap-2 mb-2.5">
+        <button
+          type="button"
+          onclick="returnToMenu()"
+          class="btn-press px-2.5 py-1.5 rounded-xl bg-[#16231f] border border-emerald-900/60 text-slate-300 text-xs font-semibold flex items-center gap-1"
+          title="Tilbage til startskærm"
+        >
+          <span>⚙️</span> Menu
+        </button>
+
+        <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400/90 flex items-center gap-1.5">
+          <span>🎯</span> Mål: <span id="target-score-label">10</span> point
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button
+            type="button"
+            onclick="swapRolesInGame()"
+            class="btn-press px-2.5 py-1.5 rounded-xl bg-[#16231f] border border-emerald-900/60 text-amber-300 text-xs font-semibold flex items-center gap-1"
+            title="Byt chauffør og passager"
+          >
+            <span>🔄</span> Byt
+          </button>
+          <button
+            type="button"
+            onclick="openAddQuestionModal()"
+            class="btn-press px-2.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1"
+          >
+            <span>+</span> Spørgsmål
+          </button>
+        </div>
+      </div>
+
+      <!-- Pointtavle -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <!-- Spiller 1 Score Card -->
+        <div id="score-card-p1" class="bg-[#14201c] border border-emerald-800/50 rounded-2xl p-2.5 relative overflow-hidden">
+          <div class="flex items-center justify-between gap-1">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span id="game-role-icon-p1" class="text-sm">🚗</span>
+                <span id="game-name-p1" class="font-bold text-sm text-white truncate">Rasmus</span>
+              </div>
+              <span id="game-role-text-p1" class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Chauffør</span>
+            </div>
+            <div id="game-score-p1" class="text-2xl font-black text-emerald-400 tabular-nums pl-2">0</div>
+          </div>
+          <!-- Progress bar mod delmål -->
+          <div class="w-full h-1.5 bg-[#0a100e] rounded-full mt-2 overflow-hidden">
+            <div id="progress-p1" class="h-full bg-emerald-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Spiller 2 Score Card -->
+        <div id="score-card-p2" class="bg-[#14201c] border border-emerald-800/50 rounded-2xl p-2.5 relative overflow-hidden">
+          <div class="flex items-center justify-between gap-1">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span id="game-role-icon-p2" class="text-sm">🎮</span>
+                <span id="game-name-p2" class="font-bold text-sm text-white truncate">Marie</span>
+              </div>
+              <span id="game-role-text-p2" class="text-[10px] uppercase tracking-wider text-amber-400 font-semibold block">Game Master</span>
+            </div>
+            <div id="game-score-p2" class="text-2xl font-black text-amber-400 tabular-nums pl-2">0</div>
+          </div>
+          <!-- Progress bar mod delmål -->
+          <div class="w-full h-1.5 bg-[#0a100e] rounded-full mt-2 overflow-hidden">
+            <div id="progress-p2" class="h-full bg-amber-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- KATEGORI-VÆLGER (Pill-bar) -->
+    <nav aria-label="Kategorier" class="px-4 pt-3 pb-1">
+      <div id="category-pills" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        <!-- Genereres dynamisk via JS -->
+      </div>
+    </nav>
+
+    <!-- MIDTERSEKTION: Swipe-venligt Spørgsmålskort -->
+    <section class="flex-1 flex flex-col justify-center px-4 py-2">
+      <div
+        id="question-card"
+        onclick="nextCard()"
+        class="card-enter cursor-pointer relative bg-gradient-to-br from-[#172621] to-[#111c18] border border-emerald-700/40 rounded-3xl p-6 sm:p-7 shadow-2xl min-h-[230px] sm:min-h-[260px] flex flex-col justify-between transition-transform duration-150 active:scale-[0.99]"
+      >
+        <!-- Kort-top: Kategori badge & tæller -->
+        <div class="flex items-center justify-between gap-2">
+          <span id="card-category-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+            ✨ Kategori
+          </span>
+          <span id="card-counter" class="text-xs font-semibold text-slate-400 tabular-nums">
+            Kort 1 / 36
+          </span>
+        </div>
+
+        <!-- Kort-midte: Selve spørgsmålet -->
+        <div class="my-auto py-5">
+          <p id="card-question-text" class="text-xl sm:text-2xl font-extrabold text-white leading-snug tracking-tight">
+            Indlæser spørgsmål...
+          </p>
+        </div>
+
+        <!-- Kort-bund: Hint & Bullshit-tæller -->
+        <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-emerald-900/40">
+          <span class="flex items-center gap-1">
+            👆 Tryk eller swipe for næste
+          </span>
+          <span id="bullshit-counter-badge" class="text-rose-400/90 font-semibold">
+            🚨 0 BS
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUNDSEKTION: Game Master-styring -->
+    <footer class="px-4 pb-5 pt-2 space-y-2.5">
+      <!-- Bullshit-knap -->
+      <button
+        type="button"
+        onclick="triggerBullshit()"
+        class="w-full btn-press bg-gradient-to-r from-rose-600 via-red-600 to-rose-600 hover:from-rose-500 hover:to-rose-500 text-white font-black text-base py-3.5 px-4 rounded-2xl shadow-lg shadow-red-900/40 border border-red-400/40 flex items-center justify-center gap-2 tracking-wide"
+      >
+        <span>🚨</span> BULLSHIT! <span>🚨</span>
+      </button>
+
+      <!-- Point-knapper (Spiller 1 & Spiller 2) -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <button
+          type="button"
+          onclick="awardPoints(1)"
+          class="btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm sm:text-base py-3.5 px-3 rounded-2xl shadow-md shadow-emerald-950/50 flex flex-col items-center justify-center leading-tight"
+        >
+          <span class="text-[11px] font-bold uppercase opacity-80">+1 Point til</span>
+          <span id="btn-name-p1" class="truncate max-w-full">Rasmus</span>
+        </button>
+
+        <button
+          type="button"
+          onclick="awardPoints(2)"
+          class="btn-press bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm sm:text-base py-3.5 px-3 rounded-2xl shadow-md shadow-amber-950/50 flex flex-col items-center justify-center leading-tight"
+        >
+          <span class="text-[11px] font-bold uppercase opacity-80">+1 Point til</span>
+          <span id="btn-name-p2" class="truncate max-w-full">Marie</span>
+        </button>
+      </div>
+
+      <!-- Begge får point & Spring over -->
+      <div class="grid grid-cols-3 gap-2.5">
+        <button
+          type="button"
+          onclick="awardPoints('both')"
+          class="col-span-2 btn-press bg-[#1c2e28] hover:bg-[#243b33] border border-emerald-600/40 text-emerald-200 font-bold text-sm py-3 px-3 rounded-2xl flex items-center justify-center gap-1.5"
+        >
+          <span>🤝</span> Begge får point (Enige!)
+        </button>
+
+        <button
+          type="button"
+          onclick="nextCard(true)"
+          class="col-span-1 btn-press bg-[#15201c] hover:bg-[#1c2b26] border border-slate-700/60 text-slate-300 font-semibold text-sm py-3 px-2 rounded-2xl flex items-center justify-center gap-1"
+        >
+          Spring over <span>⏭️</span>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 3. MODAL: TILFØJ EGET SPØRGSMÅL                           -->
+  <!-- ========================================================= -->
+  <div id="add-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="bg-[#14201c] border border-emerald-700/50 w-full max-w-md rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+          <span>✍️</span> Tilføj eget spørgsmål
+        </h2>
+        <button
+          type="button"
+          onclick="closeAddQuestionModal()"
+          class="w-8 h-8 rounded-full bg-[#1e2e29] text-slate-300 hover:text-white flex items-center justify-center font-bold"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div>
+        <label for="new-q-category" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+          Kategori
+        </label>
+        <select
+          id="new-q-category"
+          class="w-full bg-[#0d1512] border border-emerald-800/60 focus:border-emerald-400 focus:outline-none rounded-2xl px-3.5 py-3 text-white text-sm font-semibold"
+        >
+          <option value="interne">🔒 Vores interne runde</option>
+          <option value="kender">💛 Hvem kender hinanden bedst?</option>
+          <option value="dilemma">🤔 Skæve dilemmaer</option>
+          <option value="tilbojelig">👉 Hvem er mest tilbøjelig til...?</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="new-q-text" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+          Dit spørgsmål
+        </label>
+        <textarea
+          id="new-q-text"
+          rows="3"
+          placeholder="F.eks. Hvad er den andens mest irriterende vane på ferier?"
+          class="w-full bg-[#0d1512] border border-emerald-800/60 focus:border-emerald-400 focus:outline-none rounded-2xl p-3.5 text-white text-sm resize-none"
+        ></textarea>
+      </div>
+
+      <div class="flex gap-2.5 pt-1">
+        <button
+          type="button"
+          onclick="closeAddQuestionModal()"
+          class="flex-1 btn-press bg-[#1d2d28] text-slate-300 font-bold text-sm py-3 rounded-2xl"
+        >
+          Annuller
+        </button>
+        <button
+          type="button"
+          onclick="saveCustomQuestion()"
+          class="flex-1 btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm py-3 rounded-2xl"
+        >
+          Gem & vis nu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 4. MODAL: SEJR / MILESTONE (10 POINT)                     -->
+  <!-- ========================================================= -->
+  <div id="victory-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-gradient-to-b from-[#192b25] to-[#111c18] border border-amber-400/50 w-full max-w-md rounded-3xl p-6 text-center shadow-2xl space-y-5">
+      <div class="text-5xl">🏆</div>
+      <div>
+        <span class="inline-block px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
+          Delmål nået!
+        </span>
+        <h2 id="victory-title" class="text-2xl sm:text-3xl font-black text-white">
+          Rasmus ramte 10 point!
+        </h2>
+        <p id="victory-subtitle" class="text-slate-300 text-sm mt-2">
+          Stillingen er 10 - 7. Vinderen bestemmer næste sang eller snack-stop!
+        </p>
+      </div>
+
+      <div class="space-y-2.5 pt-2">
+        <button
+          type="button"
+          onclick="continuePlayingNextMilestone()"
+          class="w-full btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm sm:text-base py-3.5 px-4 rounded-2xl shadow-lg"
+        >
+          🚀 Spil videre mod <span id="next-milestone-btn-label">20</span> point
+        </button>
+        <button
+          type="button"
+          onclick="resetScoresKeepQuestions()"
+          class="w-full btn-press bg-[#1c2e28] hover:bg-[#243b33] border border-emerald-700/40 text-emerald-200 font-bold text-sm py-3 px-4 rounded-2xl"
+        >
+          🔄 Nulstil point og start ny runde
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT LOGIK                                          -->
+  <!-- ========================================================= -->
+  <script>
+    // ---------------------------------------------------------
+    // 1. SPØRGSMÅLSBANK (36+ danske spørgsmål fordelt på 4 kat.)
+    // ---------------------------------------------------------
+    const DEFAULT_QUESTIONS = [
+      // Kategori 1: Hvem kender hinanden bedst? (10 spørgsmål)
+      { id: 'k1', category: 'kender', text: 'Hvad er den andens absolutte go-to snack og drikkevare på en tankstation?' },
+      { id: 'k2', category: 'kender', text: 'Hvilken sang skruer den anden ALTID helt op for i bilen, når den kommer på?' },
+      { id: 'k3', category: 'kender', text: 'Hvad er det første, den anden gør, når I træder ind på et hotelværelse?' },
+      { id: 'k4', category: 'kender', text: 'Hvilken lille hverdagsting irriterer den anden mere, end vedkommende vil indrømme?' },
+      { id: 'k5', category: 'kender', text: 'Hvis den anden kun måtte spise én livret resten af livet, hvad ville det være?' },
+      { id: 'k6', category: 'kender', text: 'Hvad er den andens ultimative drømmedestination, hvis budget og feriedage var ubegrænsede?' },
+      { id: 'k7', category: 'kender', text: 'Hvilken film eller serie kan den anden se igen og igen uden at blive træt af den?' },
+      { id: 'k8', category: 'kender', text: 'Hvad var jeres allerførste indtryk af hinanden – og hvor meget passede det?' },
+      { id: 'k9', category: 'kender', text: 'Hvordan ser den andens perfekte søndag morgen ud fra start til slut?' },
+      { id: 'k10', category: 'kender', text: 'Hvad er den andens største skjulte talent – eller mest ubrugelige evne?' },
+
+      // Kategori 2: Skæve dilemmaer (10 spørgsmål)
+      { id: 'd1', category: 'dilemma', text: 'Ville du helst køre 10 timer i bil uden aircondition om sommeren eller uden varme om vinteren?' },
+      { id: 'd2', category: 'dilemma', text: 'Ville du helst kun måtte høre den samme playliste med 5 sange resten af livet eller aldrig høre musik i bilen igen?' },
+      { id: 'd3', category: 'dilemma', text: 'Ville du helst altid fare vild på ferier, men ende på fantastiske steder – eller altid følge en stram tidsplan uden overraskelser?' },
+      { id: 'd4', category: 'dilemma', text: 'Ville du helst have, at din partner altid valgte dit tøj, eller at din partner altid bestilte din mad på restauranter?' },
+      { id: 'd5', category: 'dilemma', text: 'Ville du helst aldrig mere kunne spise søde sager på roadtrips eller aldrig mere kunne drikke kaffe/sodavand?' },
+      { id: 'd6', category: 'dilemma', text: 'Ville du helst sidde fast i en 4-timers bilkø med din svigerfamilie eller med en bil fuld af hyperaktive børnehavebørn?' },
+      { id: 'd7', category: 'dilemma', text: 'Ville du helst kun kunne kommunikere ved at synge dine sætninger på hele turen eller tale som en sportskommentator?' },
+      { id: 'd8', category: 'dilemma', text: 'Ville du helst glemme din telefon derhjemme på en uges ferie eller glemme din kuffert med tøj?' },
+      { id: 'd9', category: 'dilemma', text: 'Ville du helst altid skulle tisse 10 minutter efter I er kørt forbi en rasteplads, eller altid være sulten når alt er lukket?' },
+      { id: 'd10', category: 'dilemma', text: 'Ville du helst vinde en gratis jordomrejse i morgen, men I skal pakke på 15 minutter – eller få 50.000 kr. til at bruge i Danmark?' },
+
+      // Kategori 3: Hvem er mest tilbøjelig til...? (10 spørgsmål)
+      { id: 't1', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at fare vild, selvom GPS’en er tændt og taler dansk?' },
+      { id: 't2', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at brokke sig over andre bilisters kørsel inden for de første 10 minutter?' },
+      { id: 't3', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at falde i søvn på passagersædet med munden på vid gab?' },
+      { id: 't4', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at bruge alt for mange penge på ligegyldige snacks på en tankstation?' },
+      { id: 't5', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at pakke hele garderoben til bare en enkelt overnatning?' },
+      { id: 't6', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at sige "Vi har god tid" og derefter være 15 minutter forsinket?' },
+      { id: 't7', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at blive "hangry" (sulten og gnaven), hvis frokosten bliver udskudt?' },
+      { id: 't8', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at overtage DJ-pulten og skifte sang efter 25 sekunder?' },
+      { id: 't9', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at ville stoppe ved et tilfældigt loppemarked eller en vejbod?' },
+      { id: 't10', category: 'tilbojelig', text: 'Hvem er mest tilbøjelig til at nægte at spørge om vej eller tjekke kortet, før det er helt kritisk?' },
+
+      // Kategori 4: Vores interne runde (6 spørgsmål)
+      { id: 'i1', category: 'interne', text: 'Hvem af os er objektivt set dårligst til at vælge en film eller serie på en fredag aften?' },
+      { id: 'i2', category: 'interne', text: 'Hvem af os overtænker mest, før vi skal træffe en helt simpel beslutning?' },
+      { id: 'i3', category: 'interne', text: 'Hvis vi byttede krop i 24 timer, hvad ville være det sværeste ved at være den anden?' },
+      { id: 'i4', category: 'interne', text: 'Hvem af os er den bedste co-driver/navigatør – og hvem stresser mest over afkørsler?' },
+      { id: 'i5', category: 'interne', text: 'Hvad er vores bedste eller sjoveste fælles minde fra en tidligere tur eller ferie?' },
+      { id: 'i6', category: 'interne', text: 'Hvem vinder oftest, når vi er uenige om en ligegyldig detalje – og hvem husker bedst?' }
+    ];
+
+    const CATEGORY_META = {
+      all: { label: 'Alle (Blandet)', emoji: '🎲', badgeClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
+      kender: { label: 'Hvem kender hinanden bedst?', emoji: '💛', badgeClass: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
+      dilemma: { label: 'Skæve dilemmaer', emoji: '🤔', badgeClass: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
+      tilbojelig: { label: 'Mest tilbøjelig til...', emoji: '👉', badgeClass: 'bg-sky-500/15 text-sky-300 border-sky-500/30' },
+      interne: { label: 'Vores interne runde', emoji: '🔒', badgeClass: 'bg-rose-500/15 text-rose-300 border-rose-500/30' }
+    };
+
+    const STORAGE_KEY = 'roadtrip_parspil_state_v1';
+
+    // ---------------------------------------------------------
+    // 2. SPILTILSTAND (STATE)
+    // ---------------------------------------------------------
+    let state = {
+      p1Name: 'Rasmus',
+      p2Name: 'Marie',
+      driver: 1, // 1 = Spiller 1 kører, 2 = Spiller 2 kører
+      score1: 0,
+      score2: 0,
+      targetScore: 10,
+      bullshitCount: 0,
+      selectedCategory: 'all',
+      seenIds: [],
+      customQuestions: [],
+      currentQuestionId: null,
+      inGame: false
+    };
+
+    // ---------------------------------------------------------
+    // 3. LOCALSTORAGE PERSISTENCE
+    // ---------------------------------------------------------
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state = { ...state, ...parsed };
+        }
+      } catch (e) {
+        console.warn('Kunne ikke indlæse gemt spil:', e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Kunne ikke gemme spil:', e);
+      }
+    }
+
+    function getAllQuestions() {
+      return [...DEFAULT_QUESTIONS, ...state.customQuestions];
+    }
+
+    // ---------------------------------------------------------
+    // 4. WEB AUDIO API (BULLSHIT BUZZER & POINT-LYDE)
+    // ---------------------------------------------------------
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtx = new AudioContext();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playBullshitSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+
+        // Dobbelt dissonant horn/buzzer (sawtooth + square)
+        [145, 154].forEach((baseFreq) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(baseFreq, now);
+          osc.frequency.linearRampToValueAtTime(baseFreq * 0.72, now + 0.55);
+
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.exponentialRampToValueAtTime(0.22, now + 0.04);
+          gain.gain.setValueAtTime(0.22, now + 0.42);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.62);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.65);
+        });
+      } catch (e) {
+        // Ignorer lyd-fejl hvis browser blokerer
+      }
+    }
+
+    function playPointSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.26);
+      } catch (e) {}
+    }
+
+    // ---------------------------------------------------------
+    // 5. STARTSKÆRM & ROLLE-HÅNDTERING
+    // ---------------------------------------------------------
+    function updateSetupUI() {
+      document.getElementById('input-p1').value = state.p1Name;
+      document.getElementById('input-p2').value = state.p2Name;
+
+      const badge1 = document.getElementById('role-badge-p1');
+      const badge2 = document.getElementById('role-badge-p2');
+
+      if (state.driver === 1) {
+        badge1.className = 'px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shrink-0';
+        badge1.innerHTML = '<span>🚗</span> Chauffør';
+
+        badge2.className = 'px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border bg-amber-500/15 border-amber-500/40 text-amber-300 shrink-0';
+        badge2.innerHTML = '<span>🎮</span> Passager';
+      } else {
+        badge1.className = 'px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border bg-amber-500/15 border-amber-500/40 text-amber-300 shrink-0';
+        badge1.innerHTML = '<span>🎮</span> Passager';
+
+        badge2.className = 'px-3.5 py-3 rounded-2xl font-bold text-xs flex items-center gap-1.5 border bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shrink-0';
+        badge2.innerHTML = '<span>🚗</span> Chauffør';
+      }
+
+      // Vis "Fortsæt spil" hvis der er gemt fremdrift
+      const resumeBtn = document.getElementById('btn-resume-game');
+      if (state.score1 > 0 || state.score2 > 0 || state.seenIds.length > 0) {
+        resumeBtn.classList.remove('hidden');
+        document.getElementById('resume-score-preview').textContent =
+          `${state.p1Name} ${state.score1} – ${state.score2} ${state.p2Name}`;
+      } else {
+        resumeBtn.classList.add('hidden');
+      }
+    }
+
+    function toggleRolesSetup() {
+      state.p1Name = document.getElementById('input-p1').value.trim() || 'Spiller 1';
+      state.p2Name = document.getElementById('input-p2').value.trim() || 'Spiller 2';
+      state.driver = state.driver === 1 ? 2 : 1;
+      saveState();
+      updateSetupUI();
+    }
+
+    function startNewGame() {
+      const p1 = document.getElementById('input-p1').value.trim() || 'Rasmus';
+      const p2 = document.getElementById('input-p2').value.trim() || 'Marie';
+
+      state.p1Name = p1;
+      state.p2Name = p2;
+      state.score1 = 0;
+      state.score2 = 0;
+      state.targetScore = 10;
+      state.bullshitCount = 0;
+      state.seenIds = [];
+      state.selectedCategory = 'all';
+      state.currentQuestionId = null;
+      state.inGame = true;
+
+      saveState();
+      enterGameScreen();
+      pickNextQuestion(true);
+    }
+
+    function resumeSavedGame() {
+      const p1 = document.getElementById('input-p1').value.trim();
+      const p2 = document.getElementById('input-p2').value.trim();
+      if (p1) state.p1Name = p1;
+      if (p2) state.p2Name = p2;
+      state.inGame = true;
+      saveState();
+      enterGameScreen();
+      if (state.currentQuestionId) {
+        renderCurrentQuestion();
+      } else {
+        pickNextQuestion(true);
+      }
+    }
+
+    function returnToMenu() {
+      state.inGame = false;
+      saveState();
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('setup-screen').classList.remove('hidden');
+      updateSetupUI();
+    }
+
+    // ---------------------------------------------------------
+    // 6. SPILSKÆRM & UI-OPDATERING
+    // ---------------------------------------------------------
+    function enterGameScreen() {
+      document.getElementById('setup-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+      renderCategoryPills();
+      updateGameHeaderAndButtons();
+    }
+
+    function updateGameHeaderAndButtons() {
+      // Navne
+      document.getElementById('game-name-p1').textContent = state.p1Name;
+      document.getElementById('game-name-p2').textContent = state.p2Name;
+      document.getElementById('btn-name-p1').textContent = state.p1Name;
+      document.getElementById('btn-name-p2').textContent = state.p2Name;
+
+      // Roller
+      const p1IsDriver = state.driver === 1;
+      document.getElementById('game-role-icon-p1').textContent = p1IsDriver ? '🚗' : '🎮';
+      document.getElementById('game-role-text-p1').textContent = p1IsDriver ? 'Chauffør' : 'Game Master';
+      document.getElementById('game-role-text-p1').className = `text-[10px] uppercase tracking-wider font-semibold block ${p1IsDriver ? 'text-emerald-400' : 'text-amber-400'}`;
+
+      document.getElementById('game-role-icon-p2').textContent = p1IsDriver ? '🎮' : '🚗';
+      document.getElementById('game-role-text-p2').textContent = p1IsDriver ? 'Game Master' : 'Chauffør';
+      document.getElementById('game-role-text-p2').className = `text-[10px] uppercase tracking-wider font-semibold block ${p1IsDriver ? 'text-amber-400' : 'text-emerald-400'}`;
+
+      // Point & progress
+      document.getElementById('game-score-p1').textContent = state.score1;
+      document.getElementById('game-score-p2').textContent = state.score2;
+      document.getElementById('target-score-label').textContent = state.targetScore;
+
+      const pct1 = Math.min(100, (state.score1 / state.targetScore) * 100);
+      const pct2 = Math.min(100, (state.score2 / state.targetScore) * 100);
+      document.getElementById('progress-p1').style.width = `${pct1}%`;
+      document.getElementById('progress-p2').style.width = `${pct2}%`;
+
+      // Bullshit tæller
+      document.getElementById('bullshit-counter-badge').textContent = `🚨 ${state.bullshitCount} BS`;
+    }
+
+    function swapRolesInGame() {
+      state.driver = state.driver === 1 ? 2 : 1;
+      saveState();
+      updateGameHeaderAndButtons();
+      const newGM = state.driver === 1 ? state.p2Name : state.p1Name;
+      showToast(`🔄 Roller byttet! ${newGM} er nu Game Master 🎮`);
+    }
+
+    // ---------------------------------------------------------
+    // 7. KATEGORIER & KORT-TRÆKKER
+    // ---------------------------------------------------------
+    function renderCategoryPills() {
+      const container = document.getElementById('category-pills');
+      container.innerHTML = '';
+
+      Object.entries(CATEGORY_META).forEach(([key, meta]) => {
+        const isActive = state.selectedCategory === key;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.onclick = () => selectCategory(key);
+        btn.className = `btn-press shrink-0 px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 border transition-colors ${
+          isActive
+            ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-950/50'
+            : 'bg-[#14201c] text-slate-300 border-emerald-900/60 hover:border-emerald-700'
+        }`;
+        btn.innerHTML = `<span>${meta.emoji}</span><span>${meta.label}</span>`;
+        container.appendChild(btn);
+      });
+    }
+
+    function selectCategory(categoryKey) {
+      state.selectedCategory = categoryKey;
+      saveState();
+      renderCategoryPills();
+      pickNextQuestion(true);
+    }
+
+    function getFilteredQuestions() {
+      const all = getAllQuestions();
+      if (state.selectedCategory === 'all') return all;
+      return all.filter((q) => q.category === state.selectedCategory);
+    }
+
+    function pickNextQuestion(skipAnimation = false) {
+      const pool = getFilteredQuestions();
+      if (pool.length === 0) return;
+
+      // Find usete kort i den valgte kategori
+      let unseen = pool.filter((q) => !state.seenIds.includes(q.id));
+
+      // Hvis alle kort i kategorien er brugt, nulstil seenIds for denne kategori
+      if (unseen.length === 0) {
+        const poolIds = new Set(pool.map((q) => q.id));
+        state.seenIds = state.seenIds.filter((id) => !poolIds.has(id));
+        unseen = pool.filter((q) => q.id !== state.currentQuestionId);
+        if (unseen.length === 0) unseen = pool;
+        showToast('🔄 Hele bunken er gennemgået – blander kortene på ny!');
+      }
+
+      const randomIndex = Math.floor(Math.random() * unseen.length);
+      const chosen = unseen[randomIndex];
+
+      state.currentQuestionId = chosen.id;
+      if (!state.seenIds.includes(chosen.id)) {
+        state.seenIds.push(chosen.id);
+      }
+
+      saveState();
+      renderCurrentQuestion(!skipAnimation);
+    }
+
+    function renderCurrentQuestion(animate = true) {
+      const all = getAllQuestions();
+      const q = all.find((item) => item.id === state.currentQuestionId) || all[0];
+      if (!q) return;
+
+      const meta = CATEGORY_META[q.category] || CATEGORY_META.all;
+      const pool = getFilteredQuestions();
+      const seenInPool = pool.filter((item) => state.seenIds.includes(item.id)).length;
+
+      const card = document.getElementById('question-card');
+      if (animate) {
+        card.classList.remove('card-enter');
+        void card.offsetWidth; // trigger reflow
+        card.classList.add('card-enter');
+      }
+
+      const badge = document.getElementById('card-category-badge');
+      badge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${meta.badgeClass}`;
+      badge.innerHTML = `<span>${meta.emoji}</span><span>${meta.label}</span>`;
+
+      document.getElementById('card-counter').textContent = `Kort ${seenInPool} / ${pool.length}`;
+      document.getElementById('card-question-text').textContent = q.text;
+      updateGameHeaderAndButtons();
+    }
+
+    function nextCard(isSkipped = false) {
+      if (isSkipped) {
+        showToast('⏭️ Kort sprunget over');
+      }
+      pickNextQuestion(false);
+    }
+
+    // ---------------------------------------------------------
+    // 8. POINTGIVNING, BULLSHIT & SEJR
+    // ---------------------------------------------------------
+    function awardPoints(winner) {
+      playPointSound();
+
+      if (winner === 1) {
+        state.score1 += 1;
+        showToast(`✅ +1 point til ${state.p1Name}!`);
+      } else if (winner === 2) {
+        state.score2 += 1;
+        showToast(`✅ +1 point til ${state.p2Name}!`);
+      } else if (winner === 'both') {
+        state.score1 += 1;
+        state.score2 += 1;
+        showToast(`🤝 Enige! +1 point til begge!`);
+      }
+
+      saveState();
+      updateGameHeaderAndButtons();
+
+      // Tjek om nogen har ramt delmålet (f.eks. 10 point)
+      if (state.score1 >= state.targetScore || state.score2 >= state.targetScore) {
+        triggerMilestoneVictory();
+      } else {
+        pickNextQuestion(false);
+      }
+    }
+
+    function triggerBullshit() {
+      playBullshitSound();
+      state.bullshitCount += 1;
+      saveState();
+      updateGameHeaderAndButtons();
+
+      // Ryst skærmen og vis rød flash
+      const gameScreen = document.getElementById('game-screen');
+      const flash = document.getElementById('bullshit-flash');
+
+      gameScreen.classList.remove('shake-active');
+      flash.classList.remove('flash-active');
+      void gameScreen.offsetWidth;
+      gameScreen.classList.add('shake-active');
+      flash.classList.add('flash-active');
+
+      // Vibrer på understøttede mobiler
+      if (navigator.vibrate) {
+        navigator.vibrate([120, 60, 180]);
+      }
+
+      showToast('🚨 BULLSHIT DETEKTERET! Prøv lige igen...');
+    }
+
+    function triggerMilestoneVictory() {
+      startConfetti();
+
+      const modal = document.getElementById('victory-modal');
+      const titleEl = document.getElementById('victory-title');
+      const subEl = document.getElementById('victory-subtitle');
+      const nextBtnLabel = document.getElementById('next-milestone-btn-label');
+
+      if (state.score1 >= state.targetScore && state.score2 >= state.targetScore) {
+        titleEl.textContent = `Uafgjort ved ${state.targetScore} point!`;
+      } else if (state.score1 >= state.targetScore) {
+        titleEl.textContent = `${state.p1Name} ramte ${state.targetScore} point!`;
+      } else {
+        titleEl.textContent = `${state.p2Name} ramte ${state.targetScore} point!`;
+      }
+
+      subEl.textContent = `Stillingen er ${state.score1} – ${state.score2} (og ${state.bullshitCount} Bullshit-kald indtil nu!). Vinderen bestemmer næste sang eller snack-stop!`;
+      nextBtnLabel.textContent = state.targetScore + 10;
+
+      modal.classList.remove('hidden');
+    }
+
+    function continuePlayingNextMilestone() {
+      state.targetScore += 10;
+      saveState();
+      document.getElementById('victory-modal').classList.add('hidden');
+      updateGameHeaderAndButtons();
+      pickNextQuestion(false);
+    }
+
+    function resetScoresKeepQuestions() {
+      state.score1 = 0;
+      state.score2 = 0;
+      state.targetScore = 10;
+      state.bullshitCount = 0;
+      saveState();
+      document.getElementById('victory-modal').classList.add('hidden');
+      updateGameHeaderAndButtons();
+      pickNextQuestion(false);
+    }
+
+    // ---------------------------------------------------------
+    // 9. TILFØJ EGNE SPØRGSMÅL (MODAL)
+    // ---------------------------------------------------------
+    function openAddQuestionModal() {
+      document.getElementById('new-q-text').value = '';
+      document.getElementById('new-q-category').value = 'interne';
+      document.getElementById('add-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('new-q-text').focus(), 100);
+    }
+
+    function closeAddQuestionModal() {
+      document.getElementById('add-modal').classList.add('hidden');
+    }
+
+    function saveCustomQuestion() {
+      const text = document.getElementById('new-q-text').value.trim();
+      const category = document.getElementById('new-q-category').value;
+
+      if (!text) {
+        showToast('⚠️ Skriv et spørgsmål først');
+        return;
+      }
+
+      const newQ = {
+        id: 'custom_' + Date.now(),
+        category: category,
+        text: text
+      };
+
+      state.customQuestions.push(newQ);
+      state.currentQuestionId = newQ.id;
+      if (!state.seenIds.includes(newQ.id)) {
+        state.seenIds.push(newQ.id);
+      }
+
+      // Skift kategori til 'all' eller den valgte kategori så spørgsmålet vises med det samme
+      if (state.selectedCategory !== 'all' && state.selectedCategory !== category) {
+        state.selectedCategory = category;
+        renderCategoryPills();
+      }
+
+      saveState();
+      closeAddQuestionModal();
+      renderCurrentQuestion(true);
+      showToast('✨ Dit spørgsmål er tilføjet og vist!');
+    }
+
+    // ---------------------------------------------------------
+    // 10. TOUCH SWIPE GESTURES PÅ KORTET
+    // ---------------------------------------------------------
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const cardEl = document.getElementById('question-card');
+    cardEl.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    cardEl.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 45) {
+        // Swipe til venstre eller højre trækker nyt kort
+        nextCard(false);
+      }
+    }, { passive: true });
+
+    // ---------------------------------------------------------
+    // 11. TOAST NOTIFIKATIONER
+    // ---------------------------------------------------------
+    let toastTimeout = null;
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const msgEl = document.getElementById('toast-message');
+      msgEl.textContent = msg;
+
+      container.classList.remove('opacity-0', 'translate-y-[-10px]');
+      container.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        container.classList.remove('opacity-100', 'translate-y-0');
+        container.classList.add('opacity-0', 'translate-y-[-10px]');
+      }, 2200);
+    }
+
+    // ---------------------------------------------------------
+    // 12. KONFETTI ANIMATION (HTML5 CANVAS)
+    // ---------------------------------------------------------
+    function startConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#10b981', '#fbbf24', '#34d399', '#f59e0b', '#ffffff', '#f43f5e'];
+      const particles = [];
+
+      for (let i = 0; i < 110; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          w: Math.random() * 9 + 5,
+          h: Math.random() * 5 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 4,
+          vy: Math.random() * 4 + 2.5,
+          rot: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 10
+        });
+      }
+
+      let frame = 0;
+      function animateConfetti() {
+        frame++;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vRot;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+
+        if (frame < 160) {
+          requestAnimationFrame(animateConfetti);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      animateConfetti();
+    }
+
+    // ---------------------------------------------------------
+    // 13. INITIALISERING VED SIDELOAD
+    // ---------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      updateSetupUI();
+
+      // Hvis brugeren var midt i et spil da siden blev genindlæst, genoptag direkte
+      if (state.inGame) {
+        enterGameScreen();
+        if (state.currentQuestionId) {
+          renderCurrentQuestion(false);
+        } else {
+          pickNextQuestion(true);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
